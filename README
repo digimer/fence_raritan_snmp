@@ -1,0 +1,11 @@
+Program: fence_raritan_snmp
+Author:  digimer (mkelly@alteeve.ca)
+Date:    2015-01-06
+Version: 1.0
+License: GPL v2.0+
+
+This fence agent is for Raritan model switched PDUs.
+
+This fence agent is compatible with cman (Red Hat's High-Availability Add-On)
+and pacemaker high-availability cluster stacks.
+
