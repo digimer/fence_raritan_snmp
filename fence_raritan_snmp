@@ -10,21 +10,15 @@
 # 
 # FenceAgentAPI adaption;
 # 
-# Digimer; digimer@digimer.ca
-# http://digimer.ca
+# Alteeve's Niche! Inc. - Madison Kelly; mkelly@alteeve.ca
+# https://alteeve.ca/w/
 #
 # This software is released under the GPL v2. See the LICENSE file in the
 # configuration directory for a copy of the GPL v2.
 #
 # Bugs;
-# - None known, many expected
+# - None known
 # 
-# Warnings;
-# - The Raritan PDUs are notorious for having delays in state change actions
-#   and state change detection. This makes them sub-optimal as fence devices.
-#   If you use one, expect fence actions to take up to 30 seconds (with an 
-#   averaage of about 15 seconds in practice).
-#
 # Requirements;
 #  perl net-snmp-utils
 #
@@ -93,6 +87,9 @@ my $conf={
 		rt_name		=>	"",	# This is used for the 'list' function.
 		handle		=>	"",
 		max_node	=>	0,
+		#oid_control	=>	".1.3.6.1.4.1.850.100.1.10.2.1.4.",
+		#oid_status	=>	".1.3.6.1.4.1.850.100.1.10.2.1.2.",
+		#oid_ip		=>	".1.3.6.1.4.1.850.10.1.2.1.0",
 		oid_control	=>	".1.3.6.1.4.1.13742.6.4.1.2.1.2.1.",
 		oid_status	=>	".1.3.6.1.4.1.13742.6.4.1.2.1.2.1.",
 		oid_ip		=>	".1.3.6.1.2.1.4.20.1.1",
@@ -136,7 +133,7 @@ if ($conf->{snmp}{action} eq "metadata")
 }
 
 # Start the logs.
-record($conf, $log, "-=] Called at: . [".get_date_time($conf)."]\n");
+record($conf, $log, "-=] Called at: . [".get_date_time($conf)."]\n") if $conf->{'system'}{debug};
 
 # This loops until the lock file is removed. This is a terrible hack to deal
 # with two different sources calling this at once. This will be removed as soon
@@ -169,12 +166,12 @@ if ($bad)
 	die "Exiting on errors.\n";
 }
 my @ny=("no", "yes");
-record($conf, $log, "Raritan: ..... [$conf->{snmp}{ipaddr}].\n");
-record($conf, $log, "Community: ..... [$conf->{snmp}{community}].\n");
-record($conf, $log, "Outlet: ........ [$conf->{snmp}{node}].\n");
-record($conf, $log, "Action: ........ [$conf->{snmp}{action}].\n");
-record($conf, $log, "Version Request: [".$ny[$conf->{'system'}{version}]."].\n");
-record($conf, $log, "Done reading args. Performing action, please wait.\n");
+record($conf, $log, "Raritan: ..... [$conf->{snmp}{ipaddr}].\n") if $conf->{'system'}{debug};
+record($conf, $log, "Community: ..... [$conf->{snmp}{community}].\n") if $conf->{'system'}{debug};
+record($conf, $log, "Outlet: ........ [$conf->{snmp}{node}].\n") if $conf->{'system'}{debug};
+record($conf, $log, "Action: ........ [$conf->{snmp}{action}].\n") if $conf->{'system'}{debug};
+record($conf, $log, "Version Request: [".$ny[$conf->{'system'}{version}]."].\n") if $conf->{'system'}{debug};
+record($conf, $log, "Done reading args. Performing action, please wait.\n") if $conf->{'system'}{debug};
 
 # If I've been asked to show the version information, do so and then exit.
 if ($conf->{'system'}{version})
@@ -444,7 +441,7 @@ Raritan switched PDUs are multiport, network-switchable power distribution units
 	<parameter name="community" unique="1">
 		<getopt mixed="-c" />
 		<content type="string" />
-		<shortdesc lang="en">Set the community name. Default 'private'.</shortdesc>
+		<shortdesc lang="en">Set the community name. Default 'tripplite'.</shortdesc>
 	</parameter>
 	<parameter name="password" unique="1">
 		<getopt mixed="-p" />
@@ -728,19 +725,19 @@ sub read_cla
 				# This is the IP address or hostname of the
 				# Raritan to call.
 				$set_next="ipaddr";
-				record ($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
+				record($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
 			}
 			elsif ($arg eq "l")
 			{
 				# This is the login name.
 				$set_next="login";
-				record ($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
+				record($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
 			}
 			elsif ($arg eq "c")
 			{
 				# This is the SNMP community.
 				$set_next="community";
-				record ($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
+				record($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
 			}
 			elsif ($arg eq "p")
 			{
@@ -749,19 +746,19 @@ sub read_cla
 				# password which will be read in and it's
 				# contents will replace# this value.
 				$set_next="password";
-				record ($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
+				record($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
 			}
 			elsif ($arg eq "n")
 			{
 				# This is the node to work on.
 				$set_next="node";
-				record ($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
+				record($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
 			}
 			elsif ($arg eq "o")
 			{
 				# This is the action to take.
 				$set_next="action";
-				record ($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
+				record($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
 			}
 			elsif ($arg eq "S")
 			{
@@ -770,7 +767,7 @@ sub read_cla
 				# 'cluster.conf'. This script should echo/print
 				# the password to STDOUT.
 				$set_next="password_script";
-				record ($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
+				record($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
 			}
 			### These are not defined by Red Hat.
 			elsif ($arg eq "t")
@@ -778,7 +775,7 @@ sub read_cla
 				# This sets the total number of outlets on the
 				# PDU.
 				$set_next="total_ports";
-				record ($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
+				record($conf, $log, "Next argument will be stored in: [$set_next]\n") if $conf->{'system'}{debug};
 			}
 		}
 		else
@@ -807,7 +804,7 @@ sub read_stdin
 		chomp $option;
 		
 		# Record the line for now, but comment this out before release.
-		record ($conf, $log, "Processing option line: [$option]\n") if $conf->{'system'}{debug};
+		record($conf, $log, "Processing option line: [$option]\n") if $conf->{'system'}{debug};
 		
 		# strip leading and trailing whitespace
 		$option=~s/^\s*//;
@@ -826,7 +823,7 @@ sub read_stdin
 		my ($name,$value)=split /\s*=\s*/, $option;
 		
 		# Record the line for now, but comment this out before release.
-		record ($conf, $log, "Name: [$name], value: [$value].\n") if $conf->{'system'}{debug};
+		record($conf, $log, "Name: [$name], value: [$value].\n") if $conf->{'system'}{debug};
 		
 		# Set my variables depending on the veriable name.
 		if ($name eq "agent")
@@ -969,7 +966,7 @@ sub show_list
 	foreach my $node (1..$conf->{device}{ports})
 	{
 		my $state=get_state($conf, $log, $node);
-		record ($conf, $log, "$node,$state\n", 1);
+		record($conf, $log, "$node,$state\n", 1);
 	}
 	
 	do_exit($conf, $log, 0);
@@ -982,10 +979,10 @@ sub version
 	my ($conf, $log)=@_;
 	
 	# Print the Fence Agent version first.
-	record ($conf, $log, "Fence Agent ver. $conf->{'system'}{agent_version}\n", 1);
+	record($conf, $log, "Fence Agent ver. $conf->{'system'}{agent_version}\n", 1);
 	
 	# ToDo: Query the PDU for details.
-	record ($conf, $log, "Raritan PDU details not currently recorded.\n", 1);
+	record($conf, $log, "Raritan PDU details not currently recorded.\n", 1);
 	
 	do_exit($conf, $log, 0);
 }
