@@ -74,6 +74,7 @@ my $conf={
 		state_timeout	=>	30,	# This is the maximum number of seconds to wait for a state change confirmation.
 	},
 	path		=>	{
+		gethostip	=>	"/usr/bin/gethostip",
 		snmpset		=>	"/usr/bin/snmpset",
 		snmpget		=>	"/usr/bin/snmpget",
 	},
@@ -165,6 +166,28 @@ if ($bad)
 	unlink $conf->{'system'}{lock_file} if $conf->{'system'}{set_lock};
 	die "Exiting on errors.\n";
 }
+
+# If the IP is a hostname, translate it to it's IP.
+if ($conf->{snmp}{ipaddr} !~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)
+{
+	my $shell_call = "$conf->{path}{gethostip} -d $conf->{snmp}{ipaddr}";
+	print "[ Debug ] - Translating hostname: [$conf->{snmp}{ipaddr}] to IP.\n" if $conf->{'system'}{debug};
+	print "[ Debug ] - shell_call: [$shell_call]\n" if $conf->{'system'}{debug};
+	my $file_handle = IO::Handle->new();
+	open ($file_handle, "$shell_call 2>&1 |") or die "Failed to call: [$shell_call], error was: $!\n";
+	while(<$file_handle>)
+	{
+		chomp;
+		my $line = $_;
+		if ($line)
+		{
+			$conf->{snmp}{ipaddr} = $line;
+			print "[ Debug ] - IP is now: [$conf->{snmp}{ipaddr}].\n" if $conf->{'system'}{debug};
+		}
+	}
+	close $file_handle;
+}
+
 my @ny=("no", "yes");
 record($conf, $log, "Raritan: ..... [$conf->{snmp}{ipaddr}].\n") if $conf->{'system'}{debug};
 record($conf, $log, "Community: ..... [$conf->{snmp}{community}].\n") if $conf->{'system'}{debug};
@@ -223,8 +246,8 @@ sub connect_to_rt
 	# Make sure I can talk to the PDU.
 	my $ip;
 	my $snmp_string = "$conf->{snmp}{oid_ip}.$conf->{snmp}{ipaddr}";
-	my $fh=IO::Handle->new();
-	my $sc="$conf->{path}{snmpget} -v 2c -c $conf->{snmp}{community} $conf->{snmp}{ipaddr}:$conf->{snmp}{tcp_port} $snmp_string";
+	my $fh          = IO::Handle->new();
+	my $sc          = "$conf->{path}{snmpget} -v 2c -c $conf->{snmp}{community} $conf->{snmp}{ipaddr}:$conf->{snmp}{tcp_port} $snmp_string";
 	record($conf, $log, "calling: [$sc]\n") if $conf->{'system'}{debug};
 	open ($fh, "$sc 2>&1 |") || die "Shell call: [$sc] failed; Error: $!\n";
 	while (<$fh>)
